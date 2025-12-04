@@ -96,7 +96,14 @@ def relvort(v, u, lat, lon):
 
     N = v.shape
 
-    lat_position_in_N = int(np.where(np.array(N) == len(lat))[0])
+    # find position of latitude
+    latpos = np.where(np.array(N) == len(lat))[0]
+    # rectangular domain
+    if len(latpos) == 1:
+        lat_position_in_N = int(latpos)
+    # square domain - assume order is (pres,lat,lon)
+    else:
+        lat_position_in_N = int(latpos[0])
     # here the repetition of lat is variable and depends on input dimension of F
     index = tuple([None]*len(N[:lat_position_in_N]) + [...] + [None]*len(N[lat_position_in_N+1:]))
     phi   = np.tile(lat[index],N[:lat_position_in_N]+(1,)+N[lat_position_in_N+1:])
@@ -137,7 +144,14 @@ def PVonP(v,u,T,p,lat,lon):
 
     N     = v.shape
 
-    lat_position_in_N = int(np.where(np.array(N) == len(lat))[0])
+    # find position of latitude
+    latpos = np.where(np.array(N) == len(lat))[0]
+    # rectangular domain
+    if len(latpos) == 1:
+        lat_position_in_N = int(latpos)
+    # square domain - assume order is (pres,lat,lon)
+    else:
+        lat_position_in_N = int(latpos[0])
     # here the repetition of lat is variable and depends on input dimension of F
     index = tuple([None]*len(N[:lat_position_in_N]) + [...] + [None]*len(N[lat_position_in_N+1:]))
     phi   = np.tile(lat[index],N[:lat_position_in_N]+(1,)+N[lat_position_in_N+1:])
@@ -221,10 +235,10 @@ def streamfunction(v, u, lat, lon, tol = 1e-03):
             NBnd[ 0,:] =  2 * u[k, 0,:] / (a * dy) + u[k, 0,:] * np.tan(phi[ 0]) / a
             NBnd[-1,:] = -2 * u[k,-1,:] / (a * dy) + u[k,-1,:] * np.tan(phi[-1]) / a
         else:
-            NBnd[0, :]  = 2 * u[ 0, :] / (a * dy) + u[k,0, :] * np.tan(phi[1]) / a
-            NBnd[:,-1] += 2 * v[:, -1] / (a * dx * np.cos(phi))
-            NBnd[-1,:] -= 2 * u[-1, :] / (a * dy) - u[-1, :] * np.tan(phi[-1]) / a
-            NBnd[:, 0] -= 2 * v[ :, 0] / (a * dx * np.cos(phi))
+            NBnd[0, :]  = 2 * u[k, 0, :] / (a * dy) + u[k, 0, :] * np.tan(phi[1]) / a
+            NBnd[:,-1] += 2 * v[k, :,-1] / (a * dx * np.cos(phi))
+            NBnd[-1,:] -= 2 * u[k,-1, :] / (a * dy) - u[k,-1, :] * np.tan(phi[-1]) / a
+            NBnd[:, 0] -= 2 * v[k, :, 0] / (a * dx * np.cos(phi))
 
         zeta_mod = -(zeta - NBnd)
 
@@ -282,7 +296,14 @@ def gradm(F,lat,lon):
     dFdx = np.zeros(N)
     dFdy = np.zeros(N)
 
-    lat_position_in_N = int(np.where(np.array(N) == len(lat))[0])
+    # find position of latitude
+    latpos = np.where(np.array(N) == len(lat))[0]
+    # rectangular domain
+    if len(latpos) == 1:
+        lat_position_in_N = int(latpos)
+    # square domain - assume order is (pres,lat,lon)
+    else:
+        lat_position_in_N = int(latpos[0])
     # here the repetition of lat is variable and depends on input dimension of F
     index = tuple([None]*len(N[:lat_position_in_N]) + [...] + [None]*len(N[lat_position_in_N+1:]))
     phi   = np.tile(np.deg2rad(lat[index]),N[:lat_position_in_N]+(1,)+N[lat_position_in_N+1:])

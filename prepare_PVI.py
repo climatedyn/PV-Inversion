@@ -1,5 +1,5 @@
 import numpy as np
-from basic_functions import PVonP, streamfunction, Theta, dFdpi
+from .basic_functions import PVonP, streamfunction, Theta, dFdpi
 from scipy.interpolate import interp1d
 import xarray
 
@@ -42,7 +42,7 @@ def prepare_PVI(u0,v0,T0,Phi0,grid,PVI='full',u1=None,v1=None,T1=None,Phi1=None,
 
         lon = np.asarray(grid['lon'])
         lat = np.asarray(grid['lat'])
-        p0  = np.asarray(grid['isobaricInhPa'])
+        p0  = np.asarray(grid['pres'])
     else:
         lon = np.asarray(grid['lon'])
         lat = np.asarray(grid['lat'])
@@ -97,7 +97,7 @@ def prepare_PVI(u0,v0,T0,Phi0,grid,PVI='full',u1=None,v1=None,T1=None,Phi1=None,
         tht = np.zeros((2,len(lat),len(lon)))
         tht[0] = Tinterp(Th, H, p0, p, p12[0], Tinter)
         tht[1] = Tinterp(Th, H, p0, p, p12[1], Tinter)
-
+        
         q = PVonP(v, u, T, p,lat,lon) * 1e+06
         S = streamfunction(v, u, lat,lon)
 
