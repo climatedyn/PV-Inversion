@@ -1,10 +1,13 @@
 import numpy as np
-from .basic_functions import PVonP, streamfunction, Theta, dFdpi
+try:
+    from .basic_functions import PVonP, streamfunction, Theta, dFdpi
+except:
+    from basic_functions import PVonP, streamfunction, Theta, dFdpi
 from scipy.interpolate import interp1d
 import xarray
 
 def prepare_PVI(u0,v0,T0,Phi0,grid,PVI='full',u1=None,v1=None,T1=None,Phi1=None,Tinter='dFIdpi',
-                fCor= 'fPlane', redist='whole domain',psep = 600):
+                fCor= 'fPlane', redist='whole domain',psep = 600,verbose=0):
     '''
     This function prepares all the variables in order to put them directly into PVInversion.py
     Here, streamfunction is calculated, piecewise PV inversion prepared and various parameters set
@@ -70,26 +73,30 @@ def prepare_PVI(u0,v0,T0,Phi0,grid,PVI='full',u1=None,v1=None,T1=None,Phi1=None,
     p12 = [875, 125]  #
     psep = 600  # separation level for piecewise inversion
 
-    print('\n-----------------------------------------')
-    print('*** prepare for PV inversion      : ', PVI)
-    print('*** separation level for PPVI     : ', psep)
-    print('*** Method for PPVI definition    : ', 'Substraction method from DE92')
-    print('*** Theta interpolation           : ', Tinter)
-    print('*** PV redistribution over        : ', redist)
-    print('*** assumption for streamfunction : ', fCor)
-    print('-----------------------------------------\n')
+    #mj interpolation method (original code uses 'cubic'
+    interp_method = 'cubic'
+
+    if verbose > 1:
+        print('\n-----------------------------------------')
+        print('*** prepare for PV inversion      : ', PVI)
+        print('*** separation level for PPVI     : ', psep)
+        print('*** Method for PPVI definition    : ', 'Substraction method from DE92')
+        print('*** Theta interpolation           : ', Tinter)
+        print('*** PV redistribution over        : ', redist)
+        print('*** assumption for streamfunction : ', fCor)
+        print('-----------------------------------------\n')
 
     if PVI == 'full':
         Th = Theta(T0, p0)
 
         # u,v,T and H interpolated on more pressure levels
-        v = interp1d(p0, v0, 'cubic', axis=0)
+        v = interp1d(p0, v0, interp_method, axis=0)
         v = v(p)
-        u = interp1d(p0, u0, 'cubic', axis=0)
+        u = interp1d(p0, u0, interp_method, axis=0)
         u = u(p)
-        T = interp1d(p0, T0, 'cubic', axis=0)
+        T = interp1d(p0, T0, interp_method, axis=0)
         T = T(p)
-        H = interp1d(p0, Phi0, 'cubic', axis=0)
+        H = interp1d(p0, Phi0, interp_method, axis=0)
         H = H(p)
 
         # boundary Theta at mid-level p12 (in Tinterp different methods
@@ -105,22 +112,22 @@ def prepare_PVI(u0,v0,T0,Phi0,grid,PVI='full',u1=None,v1=None,T1=None,Phi1=None,
         Th = Theta(T0, p0)
         Thbg = Theta(T1, p0)
 
-        v   = interp1d(p0, v0, 'cubic', axis=0)
+        v   = interp1d(p0, v0, interp_method, axis=0)
         v = v(p)
-        u   = interp1d(p0, u0, 'cubic', axis=0)
+        u   = interp1d(p0, u0, interp_method, axis=0)
         u = u(p)
-        T   = interp1d(p0, T0, 'cubic', axis=0)
+        T   = interp1d(p0, T0, interp_method, axis=0)
         T = T(p)
-        H   = interp1d(p0, Phi0, 'cubic', axis=0)
+        H   = interp1d(p0, Phi0, interp_method, axis=0)
         H = H(p)
 
-        vbg = interp1d(p0, v1, 'cubic', axis=0)
+        vbg = interp1d(p0, v1, interp_method, axis=0)
         vbg = vbg(p)
-        ubg = interp1d(p0, u1, 'cubic', axis=0)
+        ubg = interp1d(p0, u1, interp_method, axis=0)
         ubg = ubg(p)
-        Tbg = interp1d(p0, T1, 'cubic', axis=0)
+        Tbg = interp1d(p0, T1, interp_method, axis=0)
         Tbg = Tbg(p)
-        Hbg = interp1d(p0, Phi1, 'cubic', axis=0)
+        Hbg = interp1d(p0, Phi1, interp_method, axis=0)
         Hbg = Hbg(p)
 
 
@@ -147,21 +154,21 @@ def prepare_PVI(u0,v0,T0,Phi0,grid,PVI='full',u1=None,v1=None,T1=None,Phi1=None,
         Th   = Theta(T0, p0)
         Thbg = Theta(T1, p0)
 
-        v   = interp1d(p0, v0, 'cubic', axis=0)
+        v   = interp1d(p0, v0, interp_method, axis=0)
         v   = v(p)
-        u   = interp1d(p0, u0, 'cubic', axis=0)
+        u   = interp1d(p0, u0, interp_method, axis=0)
         u   = u(p)
-        T   = interp1d(p0, T0, 'cubic', axis=0)
+        T   = interp1d(p0, T0, interp_method, axis=0)
         T   = T(p)
-        H   = interp1d(p0, Phi0, 'cubic', axis=0)
+        H   = interp1d(p0, Phi0, interp_method, axis=0)
         H   = H(p)
-        vbg = interp1d(p0, v1, 'cubic', axis=0)
+        vbg = interp1d(p0, v1, interp_method, axis=0)
         vbg = vbg(p)
-        ubg = interp1d(p0, u1, 'cubic', axis=0)
+        ubg = interp1d(p0, u1, interp_method, axis=0)
         ubg = ubg(p)
-        Tbg = interp1d(p0, T1, 'cubic', axis=0)
+        Tbg = interp1d(p0, T1, interp_method, axis=0)
         Tbg = Tbg(p)
-        Hbg = interp1d(p0, Phi1, 'cubic', axis=0)
+        Hbg = interp1d(p0, Phi1, interp_method, axis=0)
         Hbg = Hbg(p)
 
         Thano = Tinterp(Th, H, p0, p, p12[0], Tinter) - Tinterp(Thbg, Hbg, p0, p, p12[0], Tinter)
@@ -187,21 +194,21 @@ def prepare_PVI(u0,v0,T0,Phi0,grid,PVI='full',u1=None,v1=None,T1=None,Phi1=None,
         Th   = Theta(T0, p0)
         Thbg = Theta(T1, p0)
 
-        v   = interp1d(p0, v0, 'cubic', axis=0)
+        v   = interp1d(p0, v0, interp_method, axis=0)
         v   = v(p)
-        u   = interp1d(p0, u0, 'cubic', axis=0)
+        u   = interp1d(p0, u0, interp_method, axis=0)
         u   = u(p)
-        T   = interp1d(p0, T0, 'cubic', axis=0)
+        T   = interp1d(p0, T0, interp_method, axis=0)
         T   = T(p)
-        H   = interp1d(p0, Phi0, 'cubic', axis=0)
+        H   = interp1d(p0, Phi0, interp_method, axis=0)
         H   = H(p)
-        vbg = interp1d(p0, v1, 'cubic', axis=0)
+        vbg = interp1d(p0, v1, interp_method, axis=0)
         vbg = vbg(p)
-        ubg = interp1d(p0, u1, 'cubic', axis=0)
+        ubg = interp1d(p0, u1, interp_method, axis=0)
         ubg = ubg(p)
-        Tbg = interp1d(p0, T1, 'cubic', axis=0)
+        Tbg = interp1d(p0, T1, interp_method, axis=0)
         Tbg = Tbg(p)
-        Hbg = interp1d(p0, Phi1, 'cubic', axis=0)
+        Hbg = interp1d(p0, Phi1, interp_method, axis=0)
         Hbg = Hbg(p)
 
         Thano  = Tinterp(Th, H, p0, p, p12[1], Tinter) - Tinterp(Thbg, Hbg, p0, p, p12[1], Tinter)
@@ -227,17 +234,17 @@ def prepare_PVI(u0,v0,T0,Phi0,grid,PVI='full',u1=None,v1=None,T1=None,Phi1=None,
         Th   = Theta(T0, p0)
         Thbg = Theta(T1, p0)
 
-        v   = interp1d(p0, v0, 'cubic', axis=0)
+        v   = interp1d(p0, v0, interp_method, axis=0)
         v   = v(p)
-        u   = interp1d(p0, u0, 'cubic', axis=0)
+        u   = interp1d(p0, u0, interp_method, axis=0)
         u   = u(p)
-        T   = interp1d(p0, T0, 'cubic', axis=0)
+        T   = interp1d(p0, T0, interp_method, axis=0)
         T   = T(p)
-        H   = interp1d(p0, Phi0, 'cubic', axis=0)
+        H   = interp1d(p0, Phi0, interp_method, axis=0)
         H   = H(p)
-        Tbg = interp1d(p0, T1, 'cubic', axis=0)
+        Tbg = interp1d(p0, T1, interp_method, axis=0)
         Tbg = Tbg(p)
-        Hbg = interp1d(p0, Phi1, 'cubic', axis=0)
+        Hbg = interp1d(p0, Phi1, interp_method, axis=0)
         Hbg = Hbg(p)
 
         Thano = Tinterp(Th, H, p0, p, p12[0], Tinter) - Tinterp(Thbg, Hbg, p0, p, p12[0], Tinter)

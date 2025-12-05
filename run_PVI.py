@@ -1,5 +1,5 @@
 from prepare_PVI import prepare_PVI
-from PVinversion import PVinversion
+from PVI import PVinversion
 from basic_functions import gradm as gradient
 import xarray as xr
 from xarray import open_dataset as read
@@ -206,8 +206,8 @@ latlim  = [25, 80]
 lonlim  = [0, 359]
 dlatlon = 1
 
-data   = read('data/YOTC_20081031_18.nc')
-dataBG = read('data/TM20081013_06-TM30.nc')
+data   = read('/g/data/up6/mxj563/software/Repositories/PVinversion/data/YOTC_20081031_18.nc')
+dataBG = read('/g/data/up6/mxj563/software/Repositories/PVinversion/data/TM20081013_06-TM30.nc')
 
 # ###################       no changes below        ##########################################
 
@@ -221,6 +221,9 @@ dataBG = dataBG.sortby('isobaric',ascending=False)
 lon  = np.asarray(data['lon'])
 lat  = np.asarray(data['lat'])
 p0   = np.asarray(data['isobaricInhPa'])
+
+#mj
+data = data.rename({'isobaricInhPa':'pres'})
 
 # check for consistency between BG and daily files regarding pressure level
 assert all(np.asarray(dataBG['isobaric']) == p0), 'different vertical levels in BG and daily files'
