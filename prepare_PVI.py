@@ -340,7 +340,11 @@ def intm(F,lat,lon):
     N     = F.shape
 
     # here the repetition of lat is variable and depends on input dimension of F
-    lat_position_in_N = int(np.where(np.array(N) == len(lat))[0])
+    lat_pos = np.where(np.array(N) == len(lat))[0]
+    if len(lat_pos) == 0:
+        lat_position_in_N = int(lat_pos)
+    else:
+        lat_position_in_N = int(lat_pos[0])
     index = tuple([None]*len(N[:lat_position_in_N]) + [...] + [None]*len(N[lat_position_in_N+1:]))
     # phi has same shape as F
     phi   = np.tile(np.deg2rad(lat[index]),N[:lat_position_in_N]+(1,)+N[lat_position_in_N+1:])

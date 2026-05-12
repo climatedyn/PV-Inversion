@@ -99,7 +99,7 @@ def relvort(v, u, lat, lon):
     # find position of latitude
     latpos = np.where(np.array(N) == len(lat))[0]
     # rectangular domain
-    if len(latpos) == 1:
+    if len(latpos) == 0:
         lat_position_in_N = int(latpos)
     # square domain - assume order is (pres,lat,lon)
     else:
@@ -147,7 +147,7 @@ def PVonP(v,u,T,p,lat,lon):
     # find position of latitude
     latpos = np.where(np.array(N) == len(lat))[0]
     # rectangular domain
-    if len(latpos) == 1:
+    if len(latpos) == 0:
         lat_position_in_N = int(latpos)
     # square domain - assume order is (pres,lat,lon)
     else:
@@ -299,7 +299,7 @@ def gradm(F,lat,lon):
     # find position of latitude
     latpos = np.where(np.array(N) == len(lat))[0]
     # rectangular domain
-    if len(latpos) == 1:
+    if len(latpos) == 0:
         lat_position_in_N = int(latpos)
     # square domain - assume order is (pres,lat,lon)
     else:

@@ -10,7 +10,7 @@ def plotting(uv,uvBG,uvNT,uvTD,lat,lon,title):
 
     import matplotlib.pyplot as plt
     import cartopy.crs as ccrs
-    from basics.plot.mapping import stereo
+    #from basics.plot.mapping import stereo
 
     llon,llat = np.meshgrid(lon,lat)
 
@@ -31,10 +31,11 @@ def plotting(uv,uvBG,uvNT,uvTD,lat,lon,title):
                       projection=ccrs.NorthPolarStereo(central_longitude=0,
                                                                true_scale_latitude=None,
                                                                globe=None))
-    stereo(ax1,(min(lat),max(lat)))
-    stereo(ax2,(min(lat),max(lat)))
-    stereo(ax3,(min(lat),max(lat)))
-    stereo(ax4,(min(lat),max(lat)))
+    
+    #stereo(ax1,(min(lat),max(lat)))
+    #stereo(ax2,(min(lat),max(lat)))
+    #stereo(ax3,(min(lat),max(lat)))
+    #stereo(ax4,(min(lat),max(lat)))
 
     # ------------------------------------------------------------------------------
     # ##############################################################################
@@ -198,7 +199,7 @@ LOWinversion    = True
 TLOWinversion   = True #(only low-level temperature inversion)
 PVLOWinversion  = True #(only low-level PV inversion)
 
-plot_figure   = False
+plot_figure   = True
 save_data     = True
 
 
@@ -210,11 +211,12 @@ data   = read('/g/data/up6/mxj563/software/Repositories/PVinversion/data/YOTC_20
 dataBG = read('/g/data/up6/mxj563/software/Repositories/PVinversion/data/TM20081013_06-TM30.nc')
 
 # ###################       no changes below        ##########################################
+latsel = {'lat':np.linspace(latlim[1],latlim[0],int((latlim[1]-latlim[0])/dlatlon+1))}
 
 # reduce data to lat, -lon range of interest and sort pressure levels
-data   = data.sel(  lat=np.linspace(latlim[1],latlim[0],int(np.diff(latlim)/dlatlon+1))).squeeze()
+data   = data.sel( latsel ).squeeze()
 data   = data.sortby('isobaricInhPa',ascending=False)
-dataBG = dataBG.sel(lat=np.linspace(latlim[1],latlim[0],int(np.diff(latlim)/dlatlon+1))).squeeze()
+dataBG = dataBG.sel( latsel ).squeeze()
 dataBG = dataBG.sortby('isobaric',ascending=False)
 ##data.sel(lon=np.linspace(230,450,450-230+1)%360)
 
