@@ -20,11 +20,12 @@ BGinversion     = True
 FULLinversion   = True
 UPinversion     = True
 LOWinversion    = True
-TLOWinversion   = True #(only low-level temperature inversion)
-PVLOWinversion  = True #(only low-level PV inversion)
+TLOWinversion   = False #(only low-level temperature inversion)
+PVLOWinversion  = False #(only low-level PV inversion)
 
-plot_figure   = True
+plot_figure   = False
 save_data     = True
+save_vars     = ['PV_BAL','PV_LOW','PV_UP'] #'all'
 
 
 latlim  = [-80,-25]
@@ -174,7 +175,10 @@ if save_data:
     if invert_lat:
         PVIXR['lat'] = -PVIXR['lat']
         PVIXR = PVIXR.sortby('lat')
-    PVIXR.to_netcdf('data/PVIout.nc')
+    if isinstance(save_vars,list):
+        PVIXR[save_vars].to_netcdf('data/PVIout.nc')
+    else:
+        PVIXR.to_netcdf('data/PVIout.nc')
 
 
 
