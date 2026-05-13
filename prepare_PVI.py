@@ -62,8 +62,6 @@ def prepare_PVI(u0,v0,T0,Phi0,grid,PVI='full',u1=None,v1=None,T1=None,Phi1=None,
         assert u1.shape == u0.shape, 'u1 and u0 have to be same shape'
 
 
-    omega = 7.2921e-05
-    f = 2*omega
 
     # define pressure levels for inversion
     p1 = 900
@@ -263,7 +261,10 @@ def prepare_PVI(u0,v0,T0,Phi0,grid,PVI='full',u1=None,v1=None,T1=None,Phi1=None,
 
 
     if fCor == 'betaPlane':
-        phi0 = np.deg2rad(45)
+        omega = 7.2921e-05
+        f = 2*omega
+        #phi0 = np.deg2rad(45)
+        phi0 = np.deg2rad(mean(lat)) #mj
         thtS = tht * 1e-04 /(f* np.sin(phi0) + f * np.cos(phi0) *
                    np.tile( np.deg2rad(lat[None,:,None])-phi0, [2,1,len(lon)]))
         tht = [tht,thtS]

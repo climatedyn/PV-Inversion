@@ -124,12 +124,12 @@ def PVinversion(q, S, H, tht, lat, lon, p,
     q[-1] = np.zeros((Ny, Nx))
 
     tmp  = np.tile(lat[:,None], (1, Nx))
-    fcor = 2 * omega * np.sin(np.radians(tmp))
+    fcor = 2 * omega * np.sin(np.deg2rad(tmp))
     PI   = exner(p)  # hier muss p in hPa gegeben sein!
 
     qmin = 0.01  # PVU
     p0   = 1e+5  # in Pascal
-    ll   = a * np.radians(dx)  # m: order of hor.scale
+    ll   = a * np.deg2rad(dx)  # m: order of hor.scale
     ff   = 1e-04  # 1/s: order of Coriolisparameter
 
     # ------------------------
@@ -682,8 +682,11 @@ def qltqmin(q, qmin):
                 if qi[j][k] <= qmin[i]:
                     Nqmin += 1
                     qdif += qmin[i] - qi[j][k]
-
-        qdif /= Nx * Ny - Nqmin
+        denom = Nx * Ny - Nqmin
+        if denom == 0:
+            qdif = 0
+        else:
+            qdif /= denom 
 
         for j in range(len(qi)):
             for k in range(len(qi[0])):
