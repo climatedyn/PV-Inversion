@@ -86,93 +86,97 @@ def generateXarray(ubg,vbg,Phibg,qbg,thtbg,
                    uPVlow=None,vPVlow=None,PhiPVlow=None,qPVlow=None,thtPVlow=None,
                    p=None,lat=None,lon=None,day=None):
     
-    result = xr.Dataset({"lon"              : ("lon", lon),
-                         "lat"              : ("lat", lat),
+    result = xr.Dataset({"lon"     : ("lon", lon),
+                         "lat"     : ("lat", lat),
                          "pres"    : ("pres", p),
                          "pres_NB" : ("pres_NB" ,[875,125]),
-                         "U_velocity_of_BG" : (["pres","lat","lon"], ubg),
-                         "V_velocity_of_BG" : (["pres","lat","lon"], vbg),
-                          "Geopotential_BG" : (["pres","lat","lon"], Phibg),
-                          "PV_BG"           : (["pres","lat","lon"], qbg),
-                          "Temperature_BG"  : (["pres_NB","lat","lon"], thtbg),
-                         "U_velocity_of_BAL": (["pres","lat","lon"], u),
-                         "V_velocity_of_BAL": (["pres","lat","lon"], v),
-                          "Geopotential_BAL": (["pres","lat","lon"], Phi),
-                          "PV_BAL"          : (["pres","lat","lon"], q),
-                          "Temperature_BAL" : (["pres_NB","lat","lon"], tht),
-                         "U_velocity_of_UP" : (["pres","lat","lon"], uup),
-                         "V_velocity_of_UP" : (["pres","lat","lon"], vup),
-                          "Geopotential_UP" : (["pres","lat","lon"], Phiup),
-                          "PV_UP"           : (["pres","lat","lon"], qup),
-                          "Temperature_UP"  : (["pres_NB","lat","lon"], thtup),
-                        "U_velocity_of_LOW" : (["pres","lat","lon"], ulow),
-                        "V_velocity_of_LOW" : (["pres","lat","lon"], vlow),
-                         "Geopotential_LOW" : (["pres","lat","lon"], Philow),
-                         "PV_LOW"           : (["pres","lat","lon"], qlow),
-                         "Temperature_LOW"  : (["pres_NB","lat","lon"], thtlow),
+                         "u_bg"    : (["pres","lat","lon"], ubg),
+                         "v_bg"    : (["pres","lat","lon"], vbg),
+                         "z_bg"    : (["pres","lat","lon"], Phibg),
+                         "pv_bg"   : (["pres","lat","lon"], qbg),
+                         "t_bg"    : (["pres_NB","lat","lon"], thtbg),
+                         "u_bal"   : (["pres","lat","lon"], u),
+                         "v_bal"   : (["pres","lat","lon"], v),
+                         "z_bal"   : (["pres","lat","lon"], Phi),
+                         "pv_bal"  : (["pres","lat","lon"], q),
+                         "t_bal"   : (["pres_NB","lat","lon"], tht),
+                         "u_up"    : (["pres","lat","lon"], uup),
+                         "v_up"    : (["pres","lat","lon"], vup),
+                         "z_up"    : (["pres","lat","lon"], Phiup),
+                         "pv_up"   : (["pres","lat","lon"], qup),
+                         "t_up"    : (["pres_NB","lat","lon"], thtup),
+                         "u_low"   : (["pres","lat","lon"], ulow),
+                         "v_low"   : (["pres","lat","lon"], vlow),
+                         "z_low"   : (["pres","lat","lon"], Philow),
+                         "pv_low"  : (["pres","lat","lon"], qlow),
+                         "t_low"   : (["pres_NB","lat","lon"], thtlow),
                         })
     
     if uTlow is not None:
-        result = result.assign({ "U_velocity_of_TLOW" : (["pres","lat","lon"], uTlow),
-                        "V_velocity_of_TLOW" : (["pres","lat","lon"], vTlow),
-                         "Geopotential_TLOW" : (["pres","lat","lon"], PhiTlow),
-                         "PV_TLOW" : (["pres","lat","lon"], qTlow),
-                         "Temperature_TLOW"  : (["pres_NB","lat","lon"], thtTlow)})
+        result = result.assign({
+            "u_tlow" : (["pres","lat","lon"], uTlow),
+            "v_tlow" : (["pres","lat","lon"], vTlow),
+            "z_tlow" : (["pres","lat","lon"], PhiTlow),
+            "pv_tlow" : (["pres","lat","lon"], qTlow),
+            "t_tlow"  : (["pres_NB","lat","lon"], thtTlow)
+        })
     if uPVlow is not None:
-        result = result.assign({ "U_velocity_of_PVLOW" : (["pres","lat","lon"], uPVlow),
-                        "V_velocity_of_PVLOW" : (["pres","lat","lon"], vPVlow),
-                         "Geopotential_PVLOW" : (["pres","lat","lon"], PhiPVlow),
-                         "PV_PVLOW" : (["pres","lat","lon"], qPVlow),
-                         "Temperature_PVLOW" : (["pres_NB","lat","lon"], thtPVlow)})
+        result = result.assign({
+            "u_pvlow" : (["pres","lat","lon"], uPVlow),
+            "v_pvlow" : (["pres","lat","lon"], vPVlow),
+            "z_pvlow" : (["pres","lat","lon"], PhiPVlow),
+            "pv_pvlow": (["pres","lat","lon"], qPVlow),
+            "t_pvlow" : (["pres_NB","lat","lon"], thtPVlow)
+        })
 
     # add description for the variables
-    result["U_velocity_of_BG"].attrs["title"] = "Balanced U_velocity of background flow"
-    result["U_velocity_of_BG"].attrs["units"] = "m s**-1"
-    result["V_velocity_of_BG"].attrs["title"] = "Balanced V_velocity of background flow"
-    result["V_velocity_of_BG"].attrs["units"] = "m s**-1"
-    result["Geopotential_BG"].attrs["title"] = "Geopotential associated with background PV"
-    result["Geopotential_BG"].attrs["units"] = "m**2 s**-2"
-    result["Temperature_BG"].attrs["title"] = "Potential temperature for BGinversion"
-    result["Temperature_BG"].attrs["units"] = "K"
-    result["PV_BG"].attrs["title"] = "PV of background PV"
-    result["PV_BG"].attrs["units"] = "PVU"
+    result["u_bg"].attrs["title"] = "Balanced U_velocity of background flow"
+    result["u_bg"].attrs["units"] = "m s**-1"
+    result["v_bg"].attrs["title"] = "Balanced V_velocity of background flow"
+    result["v_bg"].attrs["units"] = "m s**-1"
+    result["z_bg"].attrs["title"] = "Geopotential associated with background PV"
+    result["z_bg"].attrs["units"] = "m**2 s**-2"
+    result["t_bg"].attrs["title"] = "Potential temperature for BGinversion"
+    result["t_bg"].attrs["units"] = "K"
+    result["pv_bg"].attrs["title"] = "PV of background PV"
+    result["pv_bg"].attrs["units"] = "PVU"
 
-    result["U_velocity_of_BAL"].attrs["title"] = "Balanced U_velocity"
-    result["U_velocity_of_BAL"].attrs["units"] = "m s**-1"
-    result["V_velocity_of_BAL"].attrs["title"] = "Balanced V_velocity"
-    result["V_velocity_of_BAL"].attrs["units"] = "m s**-1"
-    result["Geopotential_BAL"].attrs["title"] = "Geopotential associated with full PV"
-    result["Geopotential_BAL"].attrs["units"] = "m**2 s**-2"
-    result["Temperature_BAL"].attrs["title"] = "Potential temperature for full inversion"
-    result["Temperature_BAL"].attrs["units"] = "K"
-    result["PV_BAL"].attrs["title"] = "full PV"
-    result["PV_BAL"].attrs["units"] = "PVU"
+    result["u_bal"].attrs["title"] = "Balanced U_velocity"
+    result["u_bal"].attrs["units"] = "m s**-1"
+    result["v_bal"].attrs["title"] = "Balanced V_velocity"
+    result["v_bal"].attrs["units"] = "m s**-1"
+    result["z_bal"].attrs["title"] = "Geopotential associated with full PV"
+    result["z_bal"].attrs["units"] = "m**2 s**-2"
+    result["t_bal"].attrs["title"] = "Potential temperature for full inversion"
+    result["t_bal"].attrs["units"] = "K"
+    result["pv_bal"].attrs["title"] = "full PV"
+    result["pv_bal"].attrs["units"] = "PVU"
 
-    result["U_velocity_of_UP"].attrs["title"] = "Balanced U_velocity associated with \
+    result["u_up"].attrs["title"] = "Balanced U_velocity associated with \
                                                         upper-level PV anomalies"
-    result["U_velocity_of_UP"].attrs["units"] = "m s**-1"
-    result["V_velocity_of_UP"].attrs["title"] = "Balanced V_velocity associated \
+    result["u_up"].attrs["units"] = "m s**-1"
+    result["v_up"].attrs["title"] = "Balanced V_velocity associated \
                                                         with upper-level PV anomalies"
-    result["V_velocity_of_UP"].attrs["units"] = "m s**-1"
-    result["Geopotential_UP"].attrs["title"] = "Geopotential associated with upper-level PV"
-    result["Geopotential_UP"].attrs["units"] = "m**2 s**-2"
-    result["Temperature_UP"].attrs["title"] = "Potential temperature for UP inversion"
-    result["Temperature_UP"].attrs["units"] = "K"
-    result["PV_UP"].attrs["title"] = "upper-level PV"
-    result["PV_UP"].attrs["units"] = "PVU"
+    result["v_up"].attrs["units"] = "m s**-1"
+    result["z_up"].attrs["title"] = "Geopotential associated with upper-level PV"
+    result["z_up"].attrs["units"] = "m**2 s**-2"
+    result["t_up"].attrs["title"] = "Potential temperature for UP inversion"
+    result["t_up"].attrs["units"] = "K"
+    result["pv_up"].attrs["title"] = "upper-level PV"
+    result["pv_up"].attrs["units"] = "PVU"
 
-    result["U_velocity_of_LOW"].attrs["title"] = "Balanced U_velocity associated with \
+    result["u_low"].attrs["title"] = "Balanced U_velocity associated with \
                                                     low-level PV anomalies"
-    result["U_velocity_of_LOW"].attrs["units"] = "m s**-1"
-    result["V_velocity_of_LOW"].attrs["title"] = "Balanced V_velocity associated with \
+    result["u_low"].attrs["units"] = "m s**-1"
+    result["v_low"].attrs["title"] = "Balanced V_velocity associated with \
                                                     low-level PV anomalies"
-    result["V_velocity_of_LOW"].attrs["units"] = "m s**-1"
-    result["Geopotential_LOW"].attrs["title"] = "Geopotential associated with low-level PV"
-    result["Geopotential_LOW"].attrs["units"] = "m**2 s**-2"
-    result["Temperature_LOW"].attrs["title"] = "Potential temperature for LOWinversion"
-    result["Temperature_LOW"].attrs["units"] = "K"
-    result["PV_LOW"].attrs["title"] = "low-level PV"
-    result["PV_LOW"].attrs["units"] = "PVU"
+    result["v_low"].attrs["units"] = "m s**-1"
+    result["z_low"].attrs["title"] = "Geopotential associated with low-level PV"
+    result["z_low"].attrs["units"] = "m**2 s**-2"
+    result["t_low"].attrs["title"] = "Potential temperature for LOWinversion"
+    result["t_low"].attrs["units"] = "K"
+    result["pv_low"].attrs["title"] = "low-level PV"
+    result["pv_low"].attrs["units"] = "PVU"
 
     # rotate the result back to the original shape and add a time coordinate
     result.coords["time"] = day
