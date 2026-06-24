@@ -207,8 +207,8 @@ latlim  = [25, 80]
 lonlim  = [0, 359]
 dlatlon = 1
 
-data   = read('/g/data/up6/mxj563/software/Repositories/PVinversion/data/YOTC_20081031_18.nc')
-dataBG = read('/g/data/up6/mxj563/software/Repositories/PVinversion/data/TM20081013_06-TM30.nc')
+data   = read('data/YOTC_20081031_18.nc')
+dataBG = read('data/TM20081013_06-TM30.nc')
 
 # ###################       no changes below        ##########################################
 latsel = {'lat':np.linspace(latlim[1],latlim[0],int((latlim[1]-latlim[0])/dlatlon+1))}
@@ -217,43 +217,40 @@ latsel = {'lat':np.linspace(latlim[1],latlim[0],int((latlim[1]-latlim[0])/dlatlo
 data   = data.sel( latsel ).squeeze()
 data   = data.sortby('pres',ascending=False)
 dataBG = dataBG.sel( latsel ).squeeze()
-dataBG = dataBG.sortby('isobaric',ascending=False)
+dataBG = dataBG.sortby('pres',ascending=False)
 ##data.sel(lon=np.linspace(230,450,450-230+1)%360)
 
 lon  = np.asarray(data['lon'])
 lat  = np.asarray(data['lat'])
 p0   = np.asarray(data['pres'])
 
-#mj
-data = data.rename({'pres':'pres'})
 
 # check for consistency between BG and daily files regarding pressure level
-assert all(np.asarray(dataBG['isobaric']) == p0), 'different vertical levels in BG and daily files'
+assert all(np.asarray(dataBG['pres']) == p0), 'different vertical levels in BG and daily files'
 
 if BGinversion:
-    uBG = np.asarray(dataBG.U_velocity)
-    vBG = np.asarray(dataBG.V_velocity)
-    TBG = np.asarray(dataBG.Temperature)
-    zBG = np.asarray(dataBG.Geopotential)
+    uBG = np.asarray(dataBG.u)
+    vBG = np.asarray(dataBG.v)
+    TBG = np.asarray(dataBG.t)
+    zBG = np.asarray(dataBG.z)
 
     qbg, S, H, tht_bg, p = prepare_PVI(uBG,vBG,TBG,zBG,{'p':p0,'lon':lon,'lat':lat},'full')
-    Psi_bg,Phi_bg   = PVinversion(qbg, S, H, tht_bg, lat, lon, p , underrelax=0.5)[:2]
+    Psi_bg,Phi_bg   = PVinversion.PVinversion(qbg, S, H, tht_bg, lat, lon, p , underrelax=0.5)[:2]
 
     ubg, vbg = gradient(Psi_bg,lat,lon)
     ubg = -ubg
 
 if FULLinversion:
     q, S, H, tht, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'full')
-    Psi,Phi         = PVinversion(q, S, H, tht, lat, lon, p, underrelax=0.5)[:2]
+    Psi,Phi         = PVinversion.PVinversion(q, S, H, tht, lat, lon, p, underrelax=0.5)[:2]
 
     u, v = gradient(Psi,lat,lon)
     u = -u
 
 if UPinversion:
     qup, S, H, tht_up, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'up',
-                                  dataBG.U_velocity,dataBG.V_velocity,
-                                  dataBG.Temperature,dataBG.Geopotential)
-    Psi_up,Phi_up     = PVinversion(qup, S, H, tht_up, lat, lon, p, underrelax=0.5)[:2]
+                                  dataBG.u,dataBG.v,dataBG.t,dataBG.z)
+    Psi_up,Phi_up     = PVinversion.PVinversion(qup, S, H, tht_up, lat, lon, p, underrelax=0.5)[:2]
 
     uup, vup = gradient(Psi_up,lat,lon)
     uup = -uup
@@ -268,9 +265,8 @@ if UPinversion:
 
 if LOWinversion:
     qlow, S, H, tht_low, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'low',
-                                  dataBG.U_velocity,dataBG.V_velocity,
-                                  dataBG.Temperature,dataBG.Geopotential)
-    Psi_low,Phi_low    = PVinversion(qlow, S, H, tht_low, lat, lon , p, underrelax=0.5)[:2]
+                                  dataBG.u,dataBG.v,dataBG.t,dataBG.z)
+    Psi_low,Phi_low    = PVinversion.PVinversion(qlow, S, H, tht_low, lat, lon , p, underrelax=0.5)[:2]
 
     ulow, vlow = gradient(Psi_low,lat,lon)
     ulow = -ulow
@@ -284,9 +280,8 @@ if LOWinversion:
 
 if TLOWinversion:
     qTlow, S, H, tht_Tlow, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'Tlow',
-                                  dataBG.U_velocity,dataBG.V_velocity,
-                                  dataBG.Temperature,dataBG.Geopotential)
-    Psi_Tlow,Phi_Tlow = PVinversion(qTlow, S, H, tht_Tlow, lat, lon , p, underrelax=0.5)[:2]
+                                  dataBG.u,dataBG.v,dataBG.t,dataBG.z)
+    Psi_Tlow,Phi_Tlow = PVinversion.PVinversion(qTlow, S, H, tht_Tlow, lat, lon , p, underrelax=0.5)[:2]
 
     uTlow, vTlow = gradient(Psi_Tlow,lat,lon)
     uTlow = -uTlow
@@ -300,9 +295,8 @@ if TLOWinversion:
 
 if PVLOWinversion:
     qPVlow, S, H, tht_PVlow, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'PVlow',
-                                  dataBG.U_velocity,dataBG.V_velocity,
-                                  dataBG.Temperature,dataBG.Geopotential)
-    Psi_PVlow,Phi_PVlow = PVinversion(qPVlow, S, H, tht_PVlow, lat, lon , p, underrelax=0.5)[:2]
+                                  dataBG.u,dataBG.v,dataBG.t,dataBG.z)
+    Psi_PVlow,Phi_PVlow = PVinversion.PVinversion(qPVlow, S, H, tht_PVlow, lat, lon , p, underrelax=0.5)[:2]
 
     uPVlow, vPVlow = gradient(Psi_PVlow,lat,lon)
     uPVlow = -uPVlow
