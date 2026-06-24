@@ -32,7 +32,7 @@ data   = read('data/YOTC_20081031_18.nc')
 dataBG = read('data/TM20081013_06-TM30.nc')
 
 
-PVIXR = fc.ComputeInversion(data,dataBG,latlim,lonlim,BGinversion,FULLinversion,UPinversion,LOWinversion,TLOWinversion,PVLOWinversion)
+PVIXR = fc.ComputeInstantInversion(data,dataBG,latlim,lonlim,BGinversion,FULLinversion,UPinversion,LOWinversion,TLOWinversion,PVLOWinversion)
 
 if plot_figure:
     fig = fc.plotting((PVIXR.v_bal,PVIXR.u_bal),(PVIXR.v_bg,PVIXR.u_bg),(PVIXR.v_up,PVIXR.u_up),(PVIXR.v_low,PVIXR.u_low),PVIXR.lat,PVIXR.lon,250,'flow of inversion')

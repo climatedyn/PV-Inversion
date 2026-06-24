@@ -189,9 +189,10 @@ def generateXarray(ubg,vbg,Phibg,qbg,thtbg,
     result = result.transpose().expand_dims("time", 0)
 
     return result
-
-
-def ComputeInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversion=False,FULLinversion=False,UPinversion=False,LOWinversion=False,TLOWinversion=False,PVLOWinversion=False):
+        
+    
+    
+def ComputeInstantInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversion=False,FULLinversion=False,UPinversion=False,LOWinversion=False,TLOWinversion=False,PVLOWinversion=False):
     '''This function is closely modelled in `run_PVI.py` provided by the original package.
 
     main file to execute piecewise PV-inversion as defined in Teubler and Riemer 2016
@@ -317,3 +318,34 @@ def ComputeInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversion=False
                                p=p,lat=lat,lon=lon,day=data.time)
 
     return PVIXR
+
+
+def ComputeInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversion=False,FULLinversion=False,UPinversion=False,LOWinversion=False,TLOWinversion=False,PVLOWinversion=False):
+    '''Call instant inversion at every timestep. Assumes dataBG is either independent of time or has the same time dimension as data (for instance, rolling mean).
+    '''
+    if 'time' in data.dims and len(data.time > 1):
+        has_time = True
+    else:
+        has_time = False
+        data = data.squeeze()
+    
+    if 'time' in dataBG.dims and len(dataBG.time > 1):
+        bg_time = True
+    else:
+        bg_time = False
+        dataBG = dataBG.squeeze()
+
+    if not has_time:
+        return ComputeInstantInversion(data,dataBG,latlim,lonlim,BGinversion,FULLinversion,UPinversion,LOWinversion,TLOWinversion,PVLOWinversion)
+    else:
+        dst = []
+        for t,time in enumerate(data.time):
+            if bg_time:
+                dbg = dataBG.isel(time=t)
+            else:
+                dbg = dataBG
+            ds = ComputeInstantInversion(data.isel(time=t),dbg,latlim,lonlim,BGinversion,FULLinversion,UPinversion,LOWinversion,TLOWinversion,PVLOWinversion)
+            ds['time'] = time
+            dst.append(ds)
+        return xr.concat(dst,'time')
+
