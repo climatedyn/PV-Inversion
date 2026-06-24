@@ -88,42 +88,42 @@ def generateXarray(ubg,vbg,Phibg,qbg,thtbg,
     
     result = xr.Dataset({"lon"              : ("lon", lon),
                          "lat"              : ("lat", lat),
-                         "isobaricInhPa"    : ("isobaricInhPa", p),
-                         "isobaricInhPa_NB" : ("isobaricInhPa_NB" ,[875,125]),
-                         "U_velocity_of_BG" : (["isobaricInhPa","lat","lon"], ubg),
-                         "V_velocity_of_BG" : (["isobaricInhPa","lat","lon"], vbg),
-                          "Geopotential_BG" : (["isobaricInhPa","lat","lon"], Phibg),
-                          "PV_BG"           : (["isobaricInhPa","lat","lon"], qbg),
-                          "Temperature_BG"  : (["isobaricInhPa_NB","lat","lon"], thtbg),
-                         "U_velocity_of_BAL": (["isobaricInhPa","lat","lon"], u),
-                         "V_velocity_of_BAL": (["isobaricInhPa","lat","lon"], v),
-                          "Geopotential_BAL": (["isobaricInhPa","lat","lon"], Phi),
-                          "PV_BAL"          : (["isobaricInhPa","lat","lon"], q),
-                          "Temperature_BAL" : (["isobaricInhPa_NB","lat","lon"], tht),
-                         "U_velocity_of_UP" : (["isobaricInhPa","lat","lon"], uup),
-                         "V_velocity_of_UP" : (["isobaricInhPa","lat","lon"], vup),
-                          "Geopotential_UP" : (["isobaricInhPa","lat","lon"], Phiup),
-                          "PV_UP"           : (["isobaricInhPa","lat","lon"], qup),
-                          "Temperature_UP"  : (["isobaricInhPa_NB","lat","lon"], thtup),
-                        "U_velocity_of_LOW" : (["isobaricInhPa","lat","lon"], ulow),
-                        "V_velocity_of_LOW" : (["isobaricInhPa","lat","lon"], vlow),
-                         "Geopotential_LOW" : (["isobaricInhPa","lat","lon"], Philow),
-                         "PV_LOW"           : (["isobaricInhPa","lat","lon"], qlow),
-                         "Temperature_LOW"  : (["isobaricInhPa_NB","lat","lon"], thtlow),
+                         "pres"    : ("pres", p),
+                         "pres_NB" : ("pres_NB" ,[875,125]),
+                         "U_velocity_of_BG" : (["pres","lat","lon"], ubg),
+                         "V_velocity_of_BG" : (["pres","lat","lon"], vbg),
+                          "Geopotential_BG" : (["pres","lat","lon"], Phibg),
+                          "PV_BG"           : (["pres","lat","lon"], qbg),
+                          "Temperature_BG"  : (["pres_NB","lat","lon"], thtbg),
+                         "U_velocity_of_BAL": (["pres","lat","lon"], u),
+                         "V_velocity_of_BAL": (["pres","lat","lon"], v),
+                          "Geopotential_BAL": (["pres","lat","lon"], Phi),
+                          "PV_BAL"          : (["pres","lat","lon"], q),
+                          "Temperature_BAL" : (["pres_NB","lat","lon"], tht),
+                         "U_velocity_of_UP" : (["pres","lat","lon"], uup),
+                         "V_velocity_of_UP" : (["pres","lat","lon"], vup),
+                          "Geopotential_UP" : (["pres","lat","lon"], Phiup),
+                          "PV_UP"           : (["pres","lat","lon"], qup),
+                          "Temperature_UP"  : (["pres_NB","lat","lon"], thtup),
+                        "U_velocity_of_LOW" : (["pres","lat","lon"], ulow),
+                        "V_velocity_of_LOW" : (["pres","lat","lon"], vlow),
+                         "Geopotential_LOW" : (["pres","lat","lon"], Philow),
+                         "PV_LOW"           : (["pres","lat","lon"], qlow),
+                         "Temperature_LOW"  : (["pres_NB","lat","lon"], thtlow),
                         })
     
     if uTlow is not None:
-        result = result.assign({ "U_velocity_of_TLOW" : (["isobaricInhPa","lat","lon"], uTlow),
-                        "V_velocity_of_TLOW" : (["isobaricInhPa","lat","lon"], vTlow),
-                         "Geopotential_TLOW" : (["isobaricInhPa","lat","lon"], PhiTlow),
-                         "PV_TLOW" : (["isobaricInhPa","lat","lon"], qTlow),
-                         "Temperature_TLOW"  : (["isobaricInhPa_NB","lat","lon"], thtTlow)})
+        result = result.assign({ "U_velocity_of_TLOW" : (["pres","lat","lon"], uTlow),
+                        "V_velocity_of_TLOW" : (["pres","lat","lon"], vTlow),
+                         "Geopotential_TLOW" : (["pres","lat","lon"], PhiTlow),
+                         "PV_TLOW" : (["pres","lat","lon"], qTlow),
+                         "Temperature_TLOW"  : (["pres_NB","lat","lon"], thtTlow)})
     if uPVlow is not None:
-        result = result.assign({ "U_velocity_of_PVLOW" : (["isobaricInhPa","lat","lon"], uPVlow),
-                        "V_velocity_of_PVLOW" : (["isobaricInhPa","lat","lon"], vPVlow),
-                         "Geopotential_PVLOW" : (["isobaricInhPa","lat","lon"], PhiPVlow),
-                         "PV_PVLOW" : (["isobaricInhPa","lat","lon"], qPVlow),
-                         "Temperature_PVLOW" : (["isobaricInhPa_NB","lat","lon"], thtPVlow)})
+        result = result.assign({ "U_velocity_of_PVLOW" : (["pres","lat","lon"], uPVlow),
+                        "V_velocity_of_PVLOW" : (["pres","lat","lon"], vPVlow),
+                         "Geopotential_PVLOW" : (["pres","lat","lon"], PhiPVlow),
+                         "PV_PVLOW" : (["pres","lat","lon"], qPVlow),
+                         "Temperature_PVLOW" : (["pres_NB","lat","lon"], thtPVlow)})
 
     # add description for the variables
     result["U_velocity_of_BG"].attrs["title"] = "Balanced U_velocity of background flow"
@@ -215,17 +215,17 @@ latsel = {'lat':np.linspace(latlim[1],latlim[0],int((latlim[1]-latlim[0])/dlatlo
 
 # reduce data to lat, -lon range of interest and sort pressure levels
 data   = data.sel( latsel ).squeeze()
-data   = data.sortby('isobaricInhPa',ascending=False)
+data   = data.sortby('pres',ascending=False)
 dataBG = dataBG.sel( latsel ).squeeze()
 dataBG = dataBG.sortby('isobaric',ascending=False)
 ##data.sel(lon=np.linspace(230,450,450-230+1)%360)
 
 lon  = np.asarray(data['lon'])
 lat  = np.asarray(data['lat'])
-p0   = np.asarray(data['isobaricInhPa'])
+p0   = np.asarray(data['pres'])
 
 #mj
-data = data.rename({'isobaricInhPa':'pres'})
+data = data.rename({'pres':'pres'})
 
 # check for consistency between BG and daily files regarding pressure level
 assert all(np.asarray(dataBG['isobaric']) == p0), 'different vertical levels in BG and daily files'
