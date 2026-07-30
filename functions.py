@@ -1,6 +1,6 @@
-from prepare_PVI import prepare_PVI
-from PVI import PVinversion
-from basic_functions import gradm as gradient
+from .prepare_PVI import prepare_PVI
+from .PVinversion import PVinversion
+from .basic_functions import gradm as gradient
 import xarray as xr
 import numpy as np
 from aostools import climate as ac
@@ -204,6 +204,10 @@ def ComputeInstantInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversio
     The input data contains instantaneous data
     The input dataBG is typically calculated from a 30-day time mean
     '''
+    # numpy throws an error about using 'where' without 'out'
+    import warnings
+    warnings.filterwarnings("ignore",category=UserWarning)
+    
     data = ac.StandardGrid(data,rename=True)
     dataBG = ac.StandardGrid(dataBG,rename=True)
     
@@ -235,14 +239,14 @@ def ComputeInstantInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversio
         zBG = np.asarray(dataBG.z)
 
         qbg, S, H, tht_bg, p = prepare_PVI(uBG,vBG,TBG,zBG,{'p':p0,'lon':lon,'lat':lat},'full')
-        Psi_bg,Phi_bg   = PVinversion.PVinversion(qbg, S, H, tht_bg, lat, lon, p , underrelax=0.5)[:2]
+        Psi_bg,Phi_bg   = PVinversion(qbg, S, H, tht_bg, lat, lon, p , underrelax=0.5)[:2]
 
         ubg, vbg = gradient(Psi_bg,lat,lon)
         ubg = -ubg
 
     if FULLinversion:
         q, S, H, tht, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'full')
-        Psi,Phi         = PVinversion.PVinversion(q, S, H, tht, lat, lon, p, underrelax=0.5)[:2]
+        Psi,Phi         = PVinversion(q, S, H, tht, lat, lon, p, underrelax=0.5)[:2]
 
         u, v = gradient(Psi,lat,lon)
         u = -u
@@ -250,7 +254,7 @@ def ComputeInstantInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversio
     if UPinversion:
         qup, S, H, tht_up, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'up',
                                       dataBG.u,dataBG.v,dataBG.t,dataBG.z)
-        Psi_up,Phi_up     = PVinversion.PVinversion(qup, S, H, tht_up, lat, lon, p, underrelax=0.5)[:2]
+        Psi_up,Phi_up     = PVinversion(qup, S, H, tht_up, lat, lon, p, underrelax=0.5)[:2]
 
         uup, vup = gradient(Psi_up,lat,lon)
         uup = -uup
@@ -266,7 +270,7 @@ def ComputeInstantInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversio
     if LOWinversion:
         qlow, S, H, tht_low, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'low',
                                       dataBG.u,dataBG.v,dataBG.t,dataBG.z)
-        Psi_low,Phi_low    = PVinversion.PVinversion(qlow, S, H, tht_low, lat, lon , p, underrelax=0.5)[:2]
+        Psi_low,Phi_low    = PVinversion(qlow, S, H, tht_low, lat, lon , p, underrelax=0.5)[:2]
 
         ulow, vlow = gradient(Psi_low,lat,lon)
         ulow = -ulow
@@ -281,7 +285,7 @@ def ComputeInstantInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversio
     if TLOWinversion:
         qTlow, S, H, tht_Tlow, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'Tlow',
                                       dataBG.u,dataBG.v,dataBG.t,dataBG.z)
-        Psi_Tlow,Phi_Tlow = PVinversion.PVinversion(qTlow, S, H, tht_Tlow, lat, lon , p, underrelax=0.5)[:2]
+        Psi_Tlow,Phi_Tlow = PVinversion(qTlow, S, H, tht_Tlow, lat, lon , p, underrelax=0.5)[:2]
 
         uTlow, vTlow = gradient(Psi_Tlow,lat,lon)
         uTlow = -uTlow
@@ -296,7 +300,7 @@ def ComputeInstantInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversio
     if PVLOWinversion:
         qPVlow, S, H, tht_PVlow, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'PVlow',
                                       dataBG.u,dataBG.v,dataBG.t,dataBG.z)
-        Psi_PVlow,Phi_PVlow = PVinversion.PVinversion(qPVlow, S, H, tht_PVlow, lat, lon , p, underrelax=0.5)[:2]
+        Psi_PVlow,Phi_PVlow = PVinversion(qPVlow, S, H, tht_PVlow, lat, lon , p, underrelax=0.5)[:2]
 
         uPVlow, vPVlow = gradient(Psi_PVlow,lat,lon)
         uPVlow = -uPVlow
@@ -323,13 +327,13 @@ def ComputeInstantInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversio
 def ComputeInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversion=False,FULLinversion=False,UPinversion=False,LOWinversion=False,TLOWinversion=False,PVLOWinversion=False):
     '''Call instant inversion at every timestep. Assumes dataBG is either independent of time or has the same time dimension as data (for instance, rolling mean).
     '''
-    if 'time' in data.dims and len(data.time > 1):
+    if 'time' in data.dims and len(data.time) > 1:
         has_time = True
     else:
         has_time = False
         data = data.squeeze()
     
-    if 'time' in dataBG.dims and len(dataBG.time > 1):
+    if 'time' in dataBG.dims and len(dataBG.time) > 1:
         bg_time = True
     else:
         bg_time = False
@@ -339,13 +343,16 @@ def ComputeInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversion=False
         return ComputeInstantInversion(data,dataBG,latlim,lonlim,BGinversion,FULLinversion,UPinversion,LOWinversion,TLOWinversion,PVLOWinversion)
     else:
         dst = []
+        ntimes = len(data.time)
         for t,time in enumerate(data.time):
+            ac.update_progress(t/ntimes)
             if bg_time:
                 dbg = dataBG.isel(time=t)
             else:
                 dbg = dataBG
             ds = ComputeInstantInversion(data.isel(time=t),dbg,latlim,lonlim,BGinversion,FULLinversion,UPinversion,LOWinversion,TLOWinversion,PVLOWinversion)
-            ds['time'] = time
+            #ds['time'] = time
             dst.append(ds)
+        ac.update_progress(1)
         return xr.concat(dst,'time')
 
