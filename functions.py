@@ -84,11 +84,11 @@ def plotting(uv,uvBG,uvNT,uvTD,lat,lon,p,title):
     ax4.set_title('balanced background flow (after inversion)')
     return fig
 
-def generateXarray(ubg,vbg,Phibg,qbg,thtbg,
-                   u,v,Phi,q,tht,
-                   uup,vup,Phiup,qup,thtup,
-                   ulow,vlow,Philow,qlow,thtlow,
-                   uTlow=None,vTlow=None,PhiTlow=None,qTlow=None,thtTlow=None,
+def generateXarray(ubg,vbg,Phibg,Psibg,qbg,thtbg,
+                   u,v,Phi,Psi,q,tht,
+                   uup,vup,Phiup,Psiup,qup,thtup,
+                   ulow,vlow,Philow,Psilow,qlow,thtlow,
+                   uTlow=None,vTlow=None,PhiTlow=None,PsiTlow=None,qTlow=None,thtTlow=None,
                    uPVlow=None,vPVlow=None,PhiPVlow=None,qPVlow=None,thtPVlow=None,
                    p=None,lat=None,lon=None,day=None):
     
@@ -99,21 +99,25 @@ def generateXarray(ubg,vbg,Phibg,qbg,thtbg,
                          "u_bg"    : (["pres","lat","lon"], ubg),
                          "v_bg"    : (["pres","lat","lon"], vbg),
                          "z_bg"    : (["pres","lat","lon"], Phibg),
+                         "psi_bg"  : (["pres","lat","lon"], Psibg),
                          "pv_bg"   : (["pres","lat","lon"], qbg),
                          "t_bg"    : (["pres_NB","lat","lon"], thtbg),
                          "u_bal"   : (["pres","lat","lon"], u),
                          "v_bal"   : (["pres","lat","lon"], v),
                          "z_bal"   : (["pres","lat","lon"], Phi),
+                         "psi_bal" : (["pres","lat","lon"], Psi),
                          "pv_bal"  : (["pres","lat","lon"], q),
                          "t_bal"   : (["pres_NB","lat","lon"], tht),
                          "u_up"    : (["pres","lat","lon"], uup),
                          "v_up"    : (["pres","lat","lon"], vup),
                          "z_up"    : (["pres","lat","lon"], Phiup),
+                         "psi_up"  : (["pres","lat","lon"], Psiup),
                          "pv_up"   : (["pres","lat","lon"], qup),
                          "t_up"    : (["pres_NB","lat","lon"], thtup),
                          "u_low"   : (["pres","lat","lon"], ulow),
                          "v_low"   : (["pres","lat","lon"], vlow),
                          "z_low"   : (["pres","lat","lon"], Philow),
+                         "psi_low" : (["pres","lat","lon"], Psilow),
                          "pv_low"  : (["pres","lat","lon"], qlow),
                          "t_low"   : (["pres_NB","lat","lon"], thtlow),
                         })
@@ -123,6 +127,7 @@ def generateXarray(ubg,vbg,Phibg,qbg,thtbg,
             "u_tlow" : (["pres","lat","lon"], uTlow),
             "v_tlow" : (["pres","lat","lon"], vTlow),
             "z_tlow" : (["pres","lat","lon"], PhiTlow),
+            "psi_tlow": (["pres","lat","lon"], PsiTlow),
             "pv_tlow" : (["pres","lat","lon"], qTlow),
             "t_tlow"  : (["pres_NB","lat","lon"], thtTlow)
         })
@@ -131,6 +136,7 @@ def generateXarray(ubg,vbg,Phibg,qbg,thtbg,
             "u_pvlow" : (["pres","lat","lon"], uPVlow),
             "v_pvlow" : (["pres","lat","lon"], vPVlow),
             "z_pvlow" : (["pres","lat","lon"], PhiPVlow),
+            "psi_pvlow": (["pres","lat","lon"], PsiPVlow),
             "pv_pvlow": (["pres","lat","lon"], qPVlow),
             "t_pvlow" : (["pres_NB","lat","lon"], thtPVlow)
         })
@@ -142,6 +148,8 @@ def generateXarray(ubg,vbg,Phibg,qbg,thtbg,
     result["v_bg"].attrs["units"] = "m s**-1"
     result["z_bg"].attrs["title"] = "Geopotential associated with background PV"
     result["z_bg"].attrs["units"] = "m**2 s**-2"
+    result["psi_bg"].attrs["title"] = "Streamfunction associated with background PV"
+    result["psi_bg"].attrs["units"] = "m**2 s**-1"
     result["t_bg"].attrs["title"] = "Potential temperature for BGinversion"
     result["t_bg"].attrs["units"] = "K"
     result["pv_bg"].attrs["title"] = "PV of background PV"
@@ -153,6 +161,8 @@ def generateXarray(ubg,vbg,Phibg,qbg,thtbg,
     result["v_bal"].attrs["units"] = "m s**-1"
     result["z_bal"].attrs["title"] = "Geopotential associated with full PV"
     result["z_bal"].attrs["units"] = "m**2 s**-2"
+    result["psi_bal"].attrs["title"] = "Streamfunction associated with full PV"
+    result["psi_bal"].attrs["units"] = "m**2 s**-1"
     result["t_bal"].attrs["title"] = "Potential temperature for full inversion"
     result["t_bal"].attrs["units"] = "K"
     result["pv_bal"].attrs["title"] = "full PV"
@@ -166,6 +176,8 @@ def generateXarray(ubg,vbg,Phibg,qbg,thtbg,
     result["v_up"].attrs["units"] = "m s**-1"
     result["z_up"].attrs["title"] = "Geopotential associated with upper-level PV"
     result["z_up"].attrs["units"] = "m**2 s**-2"
+    result["psi_up"].attrs["title"] = "Streamfunction associated with upper-level PV"
+    result["psi_up"].attrs["units"] = "m**2 s**-1"
     result["t_up"].attrs["title"] = "Potential temperature for UP inversion"
     result["t_up"].attrs["units"] = "K"
     result["pv_up"].attrs["title"] = "upper-level PV"
@@ -179,6 +191,8 @@ def generateXarray(ubg,vbg,Phibg,qbg,thtbg,
     result["v_low"].attrs["units"] = "m s**-1"
     result["z_low"].attrs["title"] = "Geopotential associated with low-level PV"
     result["z_low"].attrs["units"] = "m**2 s**-2"
+    result["psi_low"].attrs["title"] = "Streamfunction associated with low-level PV"
+    result["psi_low"].attrs["units"] = "m**2 s**-1"
     result["t_low"].attrs["title"] = "Potential temperature for LOWinversion"
     result["t_low"].attrs["units"] = "K"
     result["pv_low"].attrs["title"] = "low-level PV"
@@ -313,12 +327,12 @@ def ComputeInstantInversion(data,dataBG,latlim=[25,80],lonlim=[0,359],BGinversio
         thtPVLOW = tht-tht_PVlow
 
 
-    PVIXR = generateXarray(ubg,vbg,Phi_bg,qbg,tht_bg,
-                               u,v,Phi,q,tht,
-                               uUP,vUP,PhiUP,qUP,thtUP,
-                               uLOW,vLOW,PhiLOW,qLOW,thtLOW,
-                               uTlow=uTLOW,vTlow=vTLOW,PhiTlow=PhiTLOW,qTlow=qTLOW,thtTlow=thtTLOW,
-                               uPVlow=uPVLOW,vPVlow=vPVLOW,PhiPVlow=PhiPVLOW,qPVlow=qPVLOW,thtPVlow=thtPVLOW,
+    PVIXR = generateXarray(ubg,vbg,Phi_bg,Psi_bg,qbg,tht_bg,
+                               u,v,Phi,Psi,q,tht,
+                               uUP,vUP,PhiUP,PsiUP,qUP,thtUP,
+                               uLOW,vLOW,PhiLOW,PsiLOW,qLOW,thtLOW,
+                               uTlow=uTLOW,vTlow=vTLOW,PhiTlow=PhiTLOW,PsiTlow=PsiTlow,qTlow=qTLOW,thtTlow=thtTLOW,
+                               uPVlow=uPVLOW,vPVlow=vPVLOW,PhiPVlow=PhiPVLOW,PsiPVLOW=PsiPVLOW,qPVlow=qPVLOW,thtPVlow=thtPVLOW,
                                p=p,lat=lat,lon=lon,day=data.time)
 
     return PVIXR
