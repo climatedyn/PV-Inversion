@@ -89,38 +89,50 @@ def generateXarray(ubg,vbg,Phibg,Psibg,qbg,thtbg,
                    uup,vup,Phiup,Psiup,qup,thtup,
                    ulow,vlow,Philow,Psilow,qlow,thtlow,
                    uTlow=None,vTlow=None,PhiTlow=None,PsiTlow=None,qTlow=None,thtTlow=None,
-                   uPVlow=None,vPVlow=None,PhiPVlow=None,qPVlow=None,thtPVlow=None,
+                   uPVlow=None,vPVlow=None,PhiPVlow=None,PsiPVlow=None,qPVlow=None,thtPVlow=None,
                    p=None,lat=None,lon=None,day=None):
-    
-    result = xr.Dataset({"lon"     : ("lon", lon),
-                         "lat"     : ("lat", lat),
-                         "pres"    : ("pres", p),
-                         "pres_NB" : ("pres_NB" ,[875,125]),
+
+    result_dict = {"lon"     : ("lon", lon),
+                   "lat"     : ("lat", lat),
+                   "pres"    : ("pres", p),
+                   "pres_NB" : ("pres_NB" ,[875,125])}
+    if ubg is not None:
+        result_dict = result_dict | {
                          "u_bg"    : (["pres","lat","lon"], ubg),
                          "v_bg"    : (["pres","lat","lon"], vbg),
                          "z_bg"    : (["pres","lat","lon"], Phibg),
                          "psi_bg"  : (["pres","lat","lon"], Psibg),
                          "pv_bg"   : (["pres","lat","lon"], qbg),
-                         "t_bg"    : (["pres_NB","lat","lon"], thtbg),
+                         "t_bg"    : (["pres_NB","lat","lon"], thtbg)
+            }
+    if u is not None:
+        result_dict = result_dict | {
                          "u_bal"   : (["pres","lat","lon"], u),
                          "v_bal"   : (["pres","lat","lon"], v),
                          "z_bal"   : (["pres","lat","lon"], Phi),
                          "psi_bal" : (["pres","lat","lon"], Psi),
                          "pv_bal"  : (["pres","lat","lon"], q),
-                         "t_bal"   : (["pres_NB","lat","lon"], tht),
+                         "t_bal"   : (["pres_NB","lat","lon"], tht)
+            }
+    if uup is not None:
+        result_dict = result_dict | {
                          "u_up"    : (["pres","lat","lon"], uup),
                          "v_up"    : (["pres","lat","lon"], vup),
                          "z_up"    : (["pres","lat","lon"], Phiup),
                          "psi_up"  : (["pres","lat","lon"], Psiup),
                          "pv_up"   : (["pres","lat","lon"], qup),
-                         "t_up"    : (["pres_NB","lat","lon"], thtup),
+                         "t_up"    : (["pres_NB","lat","lon"], thtup)
+            }
+    if ulow is not None:
+        result_dict = result_dict | {
                          "u_low"   : (["pres","lat","lon"], ulow),
                          "v_low"   : (["pres","lat","lon"], vlow),
                          "z_low"   : (["pres","lat","lon"], Philow),
                          "psi_low" : (["pres","lat","lon"], Psilow),
                          "pv_low"  : (["pres","lat","lon"], qlow),
-                         "t_low"   : (["pres_NB","lat","lon"], thtlow),
-                        })
+                         "t_low"   : (["pres_NB","lat","lon"], thtlow)
+            }
+    result = xr.Dataset(result_dict)
     
     if uTlow is not None:
         result = result.assign({
@@ -142,71 +154,71 @@ def generateXarray(ubg,vbg,Phibg,Psibg,qbg,thtbg,
         })
 
     # add description for the variables
-    result["u_bg"].attrs["title"] = "Balanced U_velocity of background flow"
-    result["u_bg"].attrs["units"] = "m s**-1"
-    result["v_bg"].attrs["title"] = "Balanced V_velocity of background flow"
-    result["v_bg"].attrs["units"] = "m s**-1"
-    result["z_bg"].attrs["title"] = "Geopotential associated with background PV"
-    result["z_bg"].attrs["units"] = "m**2 s**-2"
-    result["psi_bg"].attrs["title"] = "Streamfunction associated with background PV"
-    result["psi_bg"].attrs["units"] = "m**2 s**-1"
-    result["t_bg"].attrs["title"] = "Potential temperature for BGinversion"
-    result["t_bg"].attrs["units"] = "K"
-    result["pv_bg"].attrs["title"] = "PV of background PV"
-    result["pv_bg"].attrs["units"] = "PVU"
-
-    result["u_bal"].attrs["title"] = "Balanced U_velocity"
-    result["u_bal"].attrs["units"] = "m s**-1"
-    result["v_bal"].attrs["title"] = "Balanced V_velocity"
-    result["v_bal"].attrs["units"] = "m s**-1"
-    result["z_bal"].attrs["title"] = "Geopotential associated with full PV"
-    result["z_bal"].attrs["units"] = "m**2 s**-2"
-    result["psi_bal"].attrs["title"] = "Streamfunction associated with full PV"
-    result["psi_bal"].attrs["units"] = "m**2 s**-1"
-    result["t_bal"].attrs["title"] = "Potential temperature for full inversion"
-    result["t_bal"].attrs["units"] = "K"
-    result["pv_bal"].attrs["title"] = "full PV"
-    result["pv_bal"].attrs["units"] = "PVU"
-
-    result["u_up"].attrs["title"] = "Balanced U_velocity associated with \
-                                                        upper-level PV anomalies"
-    result["u_up"].attrs["units"] = "m s**-1"
-    result["v_up"].attrs["title"] = "Balanced V_velocity associated \
-                                                        with upper-level PV anomalies"
-    result["v_up"].attrs["units"] = "m s**-1"
-    result["z_up"].attrs["title"] = "Geopotential associated with upper-level PV"
-    result["z_up"].attrs["units"] = "m**2 s**-2"
-    result["psi_up"].attrs["title"] = "Streamfunction associated with upper-level PV"
-    result["psi_up"].attrs["units"] = "m**2 s**-1"
-    result["t_up"].attrs["title"] = "Potential temperature for UP inversion"
-    result["t_up"].attrs["units"] = "K"
-    result["pv_up"].attrs["title"] = "upper-level PV"
-    result["pv_up"].attrs["units"] = "PVU"
-
-    result["u_low"].attrs["title"] = "Balanced U_velocity associated with \
-                                                    low-level PV anomalies"
-    result["u_low"].attrs["units"] = "m s**-1"
-    result["v_low"].attrs["title"] = "Balanced V_velocity associated with \
-                                                    low-level PV anomalies"
-    result["v_low"].attrs["units"] = "m s**-1"
-    result["z_low"].attrs["title"] = "Geopotential associated with low-level PV"
-    result["z_low"].attrs["units"] = "m**2 s**-2"
-    result["psi_low"].attrs["title"] = "Streamfunction associated with low-level PV"
-    result["psi_low"].attrs["units"] = "m**2 s**-1"
-    result["t_low"].attrs["title"] = "Potential temperature for LOWinversion"
-    result["t_low"].attrs["units"] = "K"
-    result["pv_low"].attrs["title"] = "low-level PV"
-    result["pv_low"].attrs["units"] = "PVU"
+    if ubg is not None:
+        result["u_bg"].attrs["title"] = "Balanced U_velocity of background flow"
+        result["u_bg"].attrs["units"] = "m s**-1"
+        result["v_bg"].attrs["title"] = "Balanced V_velocity of background flow"
+        result["v_bg"].attrs["units"] = "m s**-1"
+        result["z_bg"].attrs["title"] = "Geopotential associated with background PV"
+        result["z_bg"].attrs["units"] = "m**2 s**-2"
+        result["psi_bg"].attrs["title"] = "Streamfunction associated with background PV"
+        result["psi_bg"].attrs["units"] = "m**2 s**-1"
+        result["t_bg"].attrs["title"] = "Potential temperature for BGinversion"
+        result["t_bg"].attrs["units"] = "K"
+        result["pv_bg"].attrs["title"] = "PV of background PV"
+        result["pv_bg"].attrs["units"] = "PVU"
+    if u is not None:
+        result["u_bal"].attrs["title"] = "Balanced U_velocity"
+        result["u_bal"].attrs["units"] = "m s**-1"
+        result["v_bal"].attrs["title"] = "Balanced V_velocity"
+        result["v_bal"].attrs["units"] = "m s**-1"
+        result["z_bal"].attrs["title"] = "Geopotential associated with full PV"
+        result["z_bal"].attrs["units"] = "m**2 s**-2"
+        result["psi_bal"].attrs["title"] = "Streamfunction associated with full PV"
+        result["psi_bal"].attrs["units"] = "m**2 s**-1"
+        result["t_bal"].attrs["title"] = "Potential temperature for full inversion"
+        result["t_bal"].attrs["units"] = "K"
+        result["pv_bal"].attrs["title"] = "full PV"
+        result["pv_bal"].attrs["units"] = "PVU"
+    if uup is not None:
+        result["u_up"].attrs["title"] = "Balanced U_velocity associated with \
+                                                            upper-level PV anomalies"
+        result["u_up"].attrs["units"] = "m s**-1"
+        result["v_up"].attrs["title"] = "Balanced V_velocity associated \
+                                                            with upper-level PV anomalies"
+        result["v_up"].attrs["units"] = "m s**-1"
+        result["z_up"].attrs["title"] = "Geopotential associated with upper-level PV"
+        result["z_up"].attrs["units"] = "m**2 s**-2"
+        result["psi_up"].attrs["title"] = "Streamfunction associated with upper-level PV"
+        result["psi_up"].attrs["units"] = "m**2 s**-1"
+        result["t_up"].attrs["title"] = "Potential temperature for UP inversion"
+        result["t_up"].attrs["units"] = "K"
+        result["pv_up"].attrs["title"] = "upper-level PV"
+        result["pv_up"].attrs["units"] = "PVU"
+    if ulow is not None:
+        result["u_low"].attrs["title"] = "Balanced U_velocity associated with \
+                                                        low-level PV anomalies"
+        result["u_low"].attrs["units"] = "m s**-1"
+        result["v_low"].attrs["title"] = "Balanced V_velocity associated with \
+                                                        low-level PV anomalies"
+        result["v_low"].attrs["units"] = "m s**-1"
+        result["z_low"].attrs["title"] = "Geopotential associated with low-level PV"
+        result["z_low"].attrs["units"] = "m**2 s**-2"
+        result["psi_low"].attrs["title"] = "Streamfunction associated with low-level PV"
+        result["psi_low"].attrs["units"] = "m**2 s**-1"
+        result["t_low"].attrs["title"] = "Potential temperature for LOWinversion"
+        result["t_low"].attrs["units"] = "K"
+        result["pv_low"].attrs["title"] = "low-level PV"
+        result["pv_low"].attrs["units"] = "PVU"
 
     # rotate the result back to the original shape and add a time coordinate
-    result.coords["time"] = day
-    result = result.transpose().expand_dims("time", 0)
+    result = result.transpose()
 
     return result
         
     
     
-def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=False,UPinversion=False,LOWinversion=False,TLOWinversion=False,PVLOWinversion=False):
+def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=True,UPinversion=False,LOWinversion=False,TLOWinversion=False,PVLOWinversion=False):
     '''This function is closely modelled in `run_PVI.py` provided by the original package.
 
     main file to execute piecewise PV-inversion as defined in Teubler and Riemer 2016
@@ -260,13 +272,18 @@ def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=False,UP
 
         ubg, vbg = gradient(Psi_bg,lat,lon)
         ubg = -ubg
+    else:
+        ubg, vbg, Phi_bg, Psi_bg, qbg, tht_bg = None, None, None, None, None, None
 
-    if FULLinversion:
+    # full inversion is the basis for all partial inversions
+    if FULLinversion or UPinversion or LOWinversion or TLOWinversion or PVLOWinversion:
         q, S, H, tht, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'full')
         Psi,Phi         = PVinversion(q, S, H, tht, lat, lon, p, underrelax=0.5)[:2]
 
         u, v = gradient(Psi,lat,lon)
         u = -u
+    else:
+        u, v, Phi, Psi, q, tht = None, None, None, None, None, None
 
     if UPinversion:
         qup, S, H, tht_up, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'up',
@@ -280,8 +297,11 @@ def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=False,UP
         uUP = u - uup
         vUP = v - vup
         PhiUP = Phi-Phi_up
+        PsiUP = Psi-Psi_up
         qUP   = q-qup
         thtUP = tht-tht_up
+    else:
+        uUP, vUP, PhiUP, PsiUP, qUP, thtUP = None, None, None, None, None, None
 
 
     if LOWinversion:
@@ -296,8 +316,11 @@ def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=False,UP
         uLOW = u - ulow
         vLOW = v - vlow
         PhiLOW = Phi-Phi_low
+        PsiLOW = Psi-Psi_low
         qLOW   = q-qlow
         thtLOW = tht-tht_low
+    else:
+        uLOW, vLOW, PhiLOW, PsiLOW, qLOW, thtLOW = None, None, None, None, None, None
 
     if TLOWinversion:
         qTlow, S, H, tht_Tlow, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'Tlow',
@@ -311,8 +334,11 @@ def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=False,UP
         uTLOW = u - uTlow
         vTLOW = v - vTlow
         PhiTLOW = Phi-Phi_Tlow
+        PsiTLOW = Psi-Psi_Tlow
         qTLOW   = q-qTlow
         thtTLOW = tht-tht_Tlow
+    else:
+        uTLOW, vTLOW, PhiTLOW, PsiTLOW, qTLOW, thtTLOW = None, None, None, None, None, None
 
     if PVLOWinversion:
         qPVlow, S, H, tht_PVlow, p = prepare_PVI(data.u,data.v,data.t,data.z,data.coords,'PVlow',
@@ -326,50 +352,87 @@ def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=False,UP
         uPVLOW = u - uPVlow
         vPVLOW = v - vPVlow
         PhiPVLOW = Phi-Phi_PVlow
+        PsiPVLOW = Psi-Psi_PVlow
         qPVLOW   = q-qPVlow
         thtPVLOW = tht-tht_PVlow
+    else:
+        uPVLOW, vPVLOW, PhiPVLOW, PsiPVLOW, qPVLOW, thtPVLOW = None, None, None, None, None, None
 
 
     PVIXR = generateXarray(ubg,vbg,Phi_bg,Psi_bg,qbg,tht_bg,
                                u,v,Phi,Psi,q,tht,
                                uUP,vUP,PhiUP,PsiUP,qUP,thtUP,
                                uLOW,vLOW,PhiLOW,PsiLOW,qLOW,thtLOW,
-                               uTlow=uTLOW,vTlow=vTLOW,PhiTlow=PhiTLOW,PsiTlow=PsiTlow,qTlow=qTLOW,thtTlow=thtTLOW,
-                               uPVlow=uPVLOW,vPVlow=vPVLOW,PhiPVlow=PhiPVLOW,PsiPVLOW=PsiPVLOW,qPVlow=qPVLOW,thtPVlow=thtPVLOW,
-                               p=p,lat=lat,lon=lon,day=data.time)
+                               uTlow=uTLOW,vTlow=vTLOW,PhiTlow=PhiTLOW,PsiTlow=PsiTLOW,qTlow=qTLOW,thtTlow=thtTLOW,
+                               uPVlow=uPVLOW,vPVlow=vPVLOW,PhiPVlow=PhiPVLOW,PsiPVlow=PsiPVLOW,qPVlow=qPVLOW,thtPVlow=thtPVLOW,
+                               p=p,lat=lat,lon=lon)
 
     return PVIXR
 
 
 def ComputeInversion(data,dataBG,BGinversion=False,FULLinversion=False,UPinversion=False,LOWinversion=False,TLOWinversion=False,PVLOWinversion=False):
-    '''Call instant inversion at every timestep. Assumes dataBG is either independent of time or has the same time dimension as data (for instance, rolling mean).
+    '''Compute PV inversion over multiple dimensions. This is typically 3D data along a time dimension, but it can also be a separation into seasons, lags, etc.
     '''
-    if 'time' in data.dims and len(data.time) > 1:
-        has_time = True
-    else:
-        has_time = False
-        data = data.squeeze()
-    
-    if 'time' in dataBG.dims and len(dataBG.time) > 1:
-        bg_time = True
-    else:
-        bg_time = False
-        dataBG = dataBG.squeeze()
 
-    if not has_time:
+    data = data.squeeze()
+    dataBG = dataBG.squeeze()
+    
+    stacked = [dim for dim in data.dims if dim not in ['lon','lat','pres']]
+    stackedBG = [dim for dim in dataBG.dims if dim not in ['lon','lat','pres']]
+    common  = [s for s in stacked if s in stackedBG]
+    stacked = [s for s in stacked if s not in stackedBG]
+
+    # both data and dataBG are only functions of 3D space
+    if len(stacked)==0 and len(common)==0:
         return ComputeInstantInversion(data,dataBG,BGinversion,FULLinversion,UPinversion,LOWinversion,TLOWinversion,PVLOWinversion)
-    else:
+    # dataBG is function of 3D space, data has additional dimensions
+    elif len(stacked)>0 and len(common)==0:
         dst = []
-        ntimes = len(data.time)
-        for t,time in enumerate(data.time):
-            ac.update_progress(t/ntimes)
-            if bg_time:
-                dbg = dataBG.isel(time=t)
-            else:
-                dbg = dataBG
-            ds = ComputeInstantInversion(data.isel(time=t),dbg,BGinversion,FULLinversion,UPinversion,LOWinversion,TLOWinversion,PVLOWinversion)
-            #ds['time'] = time
+        data_stacked = data.stack(stacked=stacked)
+        nstacks = len(data_stacked.stacked)
+        for t in range(nstacks):
+            ac.update_progress(t/nstacks)
+            d_tmp = data_stacked.isel(stacked=t)
+            ds = ComputeInstantInversion(d_tmp,dataBG,BGinversion,FULLinversion,UPinversion,LOWinversion,TLOWinversion,PVLOWinversion)
+            for coord in stacked:
+                ds.coords[coord] = d_tmp[coord]
+            ds.coords['stacked'] = d_tmp['stacked']
             dst.append(ds)
         ac.update_progress(1)
-        return xr.concat(dst,'time')
+        ds = xr.concat(dst,'stacked').set_index(stacked=stacked)
+        return ds.unstack({'stacked':stacked})
+    # both dataBG and data have additional dimensions
+    else:
+        data_stacked = data.stack(stacked=stacked)
+        data_stacked_common = data_stacked.stack(common=common)
+        dataBG_common = dataBG.stack(common=common)
+        nstacks = len(data_stacked.stacked)
+        ncommon = len(dataBG_common.common)
+        count=0
+        dct = []
+        for c in range(ncommon):
+            datBG = dataBG_common.isel(common=c)
+            dst = []
+            for t in range(nstacks):
+                ac.update_progress(count/nstacks/ncommon)
+                d_tmp = data_stacked_common.isel(common=c,stacked=t)
+                ds = ComputeInstantInversion(d_tmp,datBG,BGinversion,FULLinversion,UPinversion,LOWinversion,TLOWinversion,PVLOWinversion)
+                for coord in stacked:
+                    ds.coords[coord] = d_tmp[coord]
+                ds.coords['stacked'] = d_tmp['stacked']
+                dst.append(ds)
+                count += 1
+            dc = xr.concat(dst,'stacked').set_index(stacked=stacked).unstack({'stacked':stacked})
+            for coord in common:
+                dc.coords[coord] = datBG[coord]
+            dc.coords['common'] = datBG['common']
+            dct.append(dc)
+        ac.update_progress(1)
+        ds = xr.concat(dct,'common').set_index(common=common)
+        if len(common) == 1:
+            ds = ds.rename({'common':common[0]})
+        else:
+            ds = ds.unstack({'common':common})
+        return ds
+                
 
