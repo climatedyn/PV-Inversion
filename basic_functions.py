@@ -405,7 +405,7 @@ def getLh(N, lat, lon, BB = 'DB'):
             Dyy[-1,-2] += 1
 
             if not periodic_boundaries_in_lon:
-                print('no periodicity -> NB at boundary')
+                #print('no periodicity -> NB at boundary')
                 Dxx[ 0, 1] = -2
                 Dxx[-1,-2] = -2
 

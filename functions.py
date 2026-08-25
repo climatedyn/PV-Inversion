@@ -367,7 +367,7 @@ def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=True,UPi
                                uPVlow=uPVLOW,vPVlow=vPVLOW,PhiPVlow=PhiPVLOW,PsiPVlow=PsiPVLOW,qPVlow=qPVLOW,thtPVlow=thtPVLOW,
                                p=p,lat=lat,lon=lon)
 
-    return PVIXR
+    return PVIXR.sortby('lon').sortby('lat')
 
 
 def ComputeInversion(data,dataBG,BGinversion=False,FULLinversion=False,UPinversion=False,LOWinversion=False,TLOWinversion=False,PVLOWinversion=False):
