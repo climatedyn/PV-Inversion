@@ -448,19 +448,19 @@ def A_xy(Nz,Ny,Nx,axis=0):
 
     if 0 in axis:
         ez = np.full(Nz, 1)  # Unit vector
-        Dz = sparse.diags([-ez[:-1], ez[1:]], [-1, 1])
+        Dz = sparse.diags([-ez[:-1], ez[1:]], [-1, 1],dtype=float)
     else:
         Dz = sparse.identity(Nz, format="csr") # Iz
 
     if 1 in axis:
         ey = np.full(Ny, 1)  # Unit vector
-        Dy = sparse.diags([-ey[:-1], ey[1:]], [-1, 1])
+        Dy = sparse.diags([-ey[:-1], ey[1:]], [-1, 1],dtype=float)
     else:
         Dy = sparse.identity(Ny, format="csr") # Iy
 
     if 2 in axis:
         ex = np.full(Nx, 1)  # Unit vector
-        Dx = sparse.diags([-ex[:-1], ex[1:]], [-1, 1])
+        Dx = sparse.diags([-ex[:-1], ex[1:]], [-1, 1],dtype=float)
         # cyclic in lon-direction
         Dx = Dx.tolil() # has to be a lil-matrix for modification
         Dx[0,Nx-1] = -1
@@ -489,21 +489,21 @@ def A_xx(Nz,Ny,Nx,B0=None,axis=0):
         bb = B0[1]
         bh = B0[2]
 
-        Dzz = sparse.diags([bl[1:], bb, bh[:-1]], [-1, 0, 1])
+        Dzz = sparse.diags([bl[1:], bb, bh[:-1]], [-1, 0, 1],dtype=float)
     else:
         Dzz = sparse.identity(Nz, format="csr") # Iz
 
 
     if 1 in axis:
         ey = np.full(Ny, 1)  # Unit vector
-        Dyy = sparse.diags([ey[:-1], -2 * ey, ey[:-1]], [-1, 0, 1])
+        Dyy = sparse.diags([ey[:-1], -2 * ey, ey[:-1]], [-1, 0, 1],dtype=float)
     else:
         Dyy = sparse.identity(Ny, format="csr") # Iy
 
 
     if 2 in axis:
         ex = np.full(Nx, 1)  # Unit vector
-        Dxx = sparse.diags([ex[:-1], -2 * ex, ex[:-1]], [-1, 0, 1])
+        Dxx = sparse.diags([ex[:-1], -2 * ex, ex[:-1]], [-1, 0, 1],dtype=float)
         # cyclic in lon-direction
         Dxx = Dxx.tolil() # has to be a lil-matrix for modification
         Dxx[0, Nx-1] = 1
@@ -617,13 +617,13 @@ def laplacian(Nz, Ny, Nx, ac, at, dy):
     # inversion operator for each dimension
     # schreibt in die Hauptdiagonale das Array ex * (-2) (also überall den Wert -2) und
     # in die Nebendiagonalen das Array ex (also überall den Wert 1)
-    Dxx = sparse.lil_matrix(sparse.diags([ex[:-1], -2 * ex, ex[:-1]], [-1, 0, 1]))
+    Dxx = sparse.lil_matrix(sparse.diags([ex[:-1], -2 * ex, ex[:-1]], [-1, 0, 1],dtype=float))
     # cyclic in lon-direction
     Dxx[0, Nx - 1] = 1
     Dxx[Nx - 1, 0] = 1
 
-    Dyy = sparse.diags([ ey[:-1], -2 * ey, ey[:-1]], [-1, 0, 1])
-    Dy  = sparse.diags([-ey[:-1],          ey[:-1]], [-1,    1])
+    Dyy = sparse.diags([ ey[:-1], -2 * ey, ey[:-1]], [-1, 0, 1],dtype=float)
+    Dy  = sparse.diags([-ey[:-1],          ey[:-1]], [-1,    1],dtype=float)
 
     Dxx = Dxx.tocsr()
 
