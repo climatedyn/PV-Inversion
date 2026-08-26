@@ -19,23 +19,21 @@ def plotting(uv,uvBG,uvNT,uvTD,lat,lon,p,title):
 
     llon,llat = np.meshgrid(lon,lat)
 
+    if np.mean(lat) > 0:
+        proj = ccrs.NorthPolarStereo(central_longitude=0,true_scale_latitude=None,globe=None)
+    else:
+        proj = ccrs.SouthPolarStereo(central_longitude=0,true_scale_latitude=None,globe=None)
+        
+
     fig=plt.figure(title,figsize=[20,12])
     ax1 = plt.subplot(221,
-                      projection=ccrs.NorthPolarStereo(central_longitude=0,
-                                                           true_scale_latitude=None,
-                                                           globe=None))
+                      projection=proj)
     ax2 = plt.subplot(222,
-                      projection=ccrs.NorthPolarStereo(central_longitude=0,
-                                                           true_scale_latitude=None,
-                                                           globe=None))
+                      projection=proj)
     ax3 = plt.subplot(223,
-                      projection=ccrs.NorthPolarStereo(central_longitude=0,
-                                                           true_scale_latitude=None,
-                                                           globe=None))
+                      projection=proj)
     ax4 = plt.subplot(224,
-                      projection=ccrs.NorthPolarStereo(central_longitude=0,
-                                                               true_scale_latitude=None,
-                                                               globe=None))
+                      projection=proj)
     
     #stereo(ax1,(min(lat),max(lat)))
     #stereo(ax2,(min(lat),max(lat)))
@@ -82,6 +80,10 @@ def plotting(uv,uvBG,uvNT,uvTD,lat,lon,p,title):
                transform=ccrs.PlateCarree(),regrid_shape=50)
     fig.colorbar(CS4,ax=ax4, orientation='vertical',aspect=20,fraction=0.04)
     ax4.set_title('balanced background flow (after inversion)')
+
+    for ax in [ax1,ax2,ax3,ax4]:
+        ax.coastlines()
+    
     return fig
 
 def generateXarray(ubg,vbg,Phibg,Psibg,qbg,thtbg,
@@ -237,6 +239,17 @@ def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=True,UPi
     data = ac.StandardGrid(data,rename=True)
     dataBG = ac.StandardGrid(dataBG,rename=True)
     
+
+    if data['lat'].mean() < 0:
+        lat_invert = True
+        data['lat'] = -data['lat']
+        data['v']   = -data['v']
+        dataBG['lat'] = -dataBG['lat']
+        dataBG['v']   = -dataBG['v']
+    else:
+        lat_invert = False
+
+    data = data.sortby('lat')
     
     dlatlon = np.quantile(np.diff(data['lat']),0.5)
 
@@ -247,7 +260,7 @@ def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=True,UPi
     # ###################       no changes below        ##########################################
     latsel = {'lat':np.linspace(latlim[1],latlim[0],int((latlim[1]-latlim[0])/dlatlon+1))}
 
-    # reduce data to lat, -lon range of interest and sort pressure levels
+    # reduce data to lat, lon range of interest and sort pressure levels
     data   = data.sel( latsel ).squeeze()
     data   = data.sortby('pres',ascending=False)
     dataBG = dataBG.sel( latsel ).squeeze()
@@ -366,6 +379,12 @@ def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=True,UPi
                                uTlow=uTLOW,vTlow=vTLOW,PhiTlow=PhiTLOW,PsiTlow=PsiTLOW,qTlow=qTLOW,thtTlow=thtTLOW,
                                uPVlow=uPVLOW,vPVlow=vPVLOW,PhiPVlow=PhiPVLOW,PsiPVlow=PsiPVLOW,qPVlow=qPVLOW,thtPVlow=thtPVLOW,
                                p=p,lat=lat,lon=lon)
+    
+    if lat_invert:
+        PVIXR['lat'] = -PVIXR['lat']
+        for dvar in PVIXR.data_vars:
+            if dvar[:2] == 'v_':
+                PVIXR[dvar] = -PVIXR[dvar]
 
     return PVIXR.sortby('lon').sortby('lat')
 
@@ -373,6 +392,9 @@ def ComputeInstantInversion(data,dataBG,BGinversion=False,FULLinversion=True,UPi
 def ComputeInversion(data,dataBG,BGinversion=False,FULLinversion=False,UPinversion=False,LOWinversion=False,TLOWinversion=False,PVLOWinversion=False):
     '''Compute PV inversion over multiple dimensions. This is typically 3D data along a time dimension, but it can also be a separation into seasons, lags, etc.
     '''
+
+    data   = ac.StandardGrid(data  ,rename=True)
+    dataBG = ac.StandardGrid(dataBG,rename=True)
 
     data = data.squeeze()
     dataBG = dataBG.squeeze()
@@ -400,7 +422,10 @@ def ComputeInversion(data,dataBG,BGinversion=False,FULLinversion=False,UPinversi
             dst.append(ds)
         ac.update_progress(1)
         ds = xr.concat(dst,'stacked').set_index(stacked=stacked)
-        return ds.unstack({'stacked':stacked})
+        if len(stacked) == 1:
+            return ds.rename({'stacked':stacked[0]})
+        else:
+            return ds.unstack({'stacked':stacked})
     # both dataBG and data have additional dimensions
     else:
         data_stacked = data.stack(stacked=stacked)
